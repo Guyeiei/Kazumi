@@ -1,0 +1,254 @@
+-- Mukuro Hub UI Script
+if game.CoreGui:FindFirstChild("MukuroHubUI") then
+    game.CoreGui.MukuroHubUI:Destroy()
+end
+
+local UIS = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "MukuroHubUI"
+gui.ResetOnSpawn = false
+gui.Parent = game.CoreGui
+
+-- Toggle GUI with Left Ctrl
+local isVisible = true
+UIS.InputBegan:Connect(function(input, gpe)
+    if input.KeyCode == Enum.KeyCode.LeftControl and not gpe then
+        isVisible = not isVisible
+        gui.Enabled = isVisible
+    end
+end)
+
+-- Main Frame
+local mainFrame = Instance.new("Frame", gui)
+mainFrame.Size = UDim2.new(0, 700, 0, 520)
+mainFrame.Position = UDim2.new(0.5, -350, 0.5, -260)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BorderSizePixel = 0
+
+-- Sidebar
+local sidebar = Instance.new("Frame", mainFrame)
+sidebar.Size = UDim2.new(0, 160, 1, 0)
+sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+local tabMain = Instance.new("TextButton", sidebar)
+tabMain.Size = UDim2.new(1, 0, 0, 40)
+tabMain.Position = UDim2.new(0, 0, 0, 60)
+tabMain.Text = "Main"
+tabMain.Font = Enum.Font.Gotham
+
+tabMain.TextColor3 = Color3.fromRGB(255, 255, 255)
+tabMain.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+tabMain.TextSize = 16
+
+local tabSettings = Instance.new("TextButton", sidebar)
+tabSettings.Size = UDim2.new(1, 0, 0, 40)
+tabSettings.Position = UDim2.new(0, 0, 0, 100)
+tabSettings.Text = "Settings"
+tabSettings.Font = Enum.Font.Gotham
+tabSettings.TextColor3 = Color3.fromRGB(255, 255, 255)
+tabSettings.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+tabSettings.TextSize = 16
+
+-- Header
+local header = Instance.new("TextLabel", mainFrame)
+header.Size = UDim2.new(1, 0, 0, 40)
+header.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+header.Text = "Kazumi  by Kazumi Naoki Script"
+header.Font = Enum.Font.GothamBold
+header.TextColor3 = Color3.fromRGB(255, 255, 255)
+header.TextSize = 18
+
+-- Pages
+local pages = Instance.new("Folder", mainFrame)
+pages.Name = "Pages"
+
+local mainPage = Instance.new("ScrollingFrame", pages)
+mainPage.Name = "Main"
+mainPage.Position = UDim2.new(0, 170, 0, 50)
+mainPage.Size = UDim2.new(1, -180, 1, -60)
+mainPage.BackgroundTransparency = 1
+mainPage.CanvasSize = UDim2.new(0, 0, 0, 800)
+mainPage.ScrollBarThickness = 6
+
+local settingsPage = mainPage:Clone()
+settingsPage.Name = "Settings"
+settingsPage.Parent = pages
+settingsPage.Visible = false
+
+-- Tab switching
+tabMain.MouseButton1Click:Connect(function()
+    mainPage.Visible = true
+    settingsPage.Visible = false
+end)
+
+tabSettings.MouseButton1Click:Connect(function()
+    mainPage.Visible = false
+    settingsPage.Visible = true
+end)
+
+-- UTILS
+local function createToggle(parent, text, y)
+    local btn = Instance.new("TextButton", parent)
+    btn.Size = UDim2.new(1, -10, 0, 40)
+    btn.Position = UDim2.new(0, 5, 0, y)
+    btn.Text = text
+    btn.Font = Enum.Font.Gotham
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.TextSize = 17
+
+    local state = Instance.new("Frame", btn)
+    state.Size = UDim2.new(0, 40, 0, 20)
+    state.Position = UDim2.new(1, -50, 0.5, -10)
+    state.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+    local light = Instance.new("Frame", state)
+    light.Size = UDim2.new(0, 16, 0, 16)
+    light.Position = UDim2.new(0, 2, 0.5, -8)
+    light.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+
+    local on = false
+    btn.MouseButton1Click:Connect(function()
+        on = not on
+        light.Position = on and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
+        light.BackgroundColor3 = on and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(70, 70, 70)
+    end)
+
+    return btn, y + 45
+end
+
+local function createNumberBox(parent, labelText, placeholder, y)
+    local label = Instance.new("TextLabel", parent)
+    label.Text = labelText
+    label.Size = UDim2.new(1, -10, 0, 40)
+    label.Position = UDim2.new(0, 5, 0, y)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Font = Enum.Font.Gotham
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextSize = 17
+    label.BackgroundTransparency = 1
+
+    local box = Instance.new("TextBox", parent)
+    box.Size = UDim2.new(0, 100, 0, 30)
+    box.Position = UDim2.new(1, -110, 0, y + 5)
+    box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    box.Text = placeholder
+    box.TextColor3 = Color3.new(1, 1, 1)
+    box.PlaceholderText = placeholder
+    box.Font = Enum.Font.Gotham
+    box.TextSize = 17
+
+    box.FocusLost:Connect(function()
+        local speed = tonumber(box.Text)
+        if speed and character and character:FindFirstChild("Humanoid") then
+            character.Humanoid.WalkSpeed = speed
+        end
+    end)
+
+    return y + 50
+end
+
+local function createDropdown(parent, labelText, default, y)
+    local label = Instance.new("TextLabel", parent)
+    label.Text = labelText
+    label.Size = UDim2.new(1, -10, 0, 40)
+    label.Position = UDim2.new(0, 5, 0, y)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Font = Enum.Font.Gotham
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.TextSize = 17
+    label.BackgroundTransparency = 1
+
+    local box = Instance.new("TextBox", parent)
+    box.Size = UDim2.new(0, 100, 0, 30)
+    box.Position = UDim2.new(1, -110, 0, y + 5)
+    box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    box.Text = default
+    box.TextColor3 = Color3.new(1, 1, 1)
+    box.Font = Enum.Font.Gotham
+    box.TextSize = 17
+
+    return y + 50
+end
+
+-- MAIN PAGE CONTENT
+local y = 0
+local mainTitle = Instance.new("TextLabel", mainPage)
+mainTitle.Text = "Main"
+mainTitle.Size = UDim2.new(1, -10, 0, 30)
+mainTitle.Position = UDim2.new(0, 5, 0, y)
+mainTitle.BackgroundTransparency = 1
+mainTitle.TextColor3 = Color3.new(1, 1, 1)
+mainTitle.Font = Enum.Font.GothamBold
+mainTitle.TextSize = 18
+mainTitle.TextXAlignment = Enum.TextXAlignment.Left
+y += 35
+
+_, y = createToggle(mainPage, "Auto Farm Money", y)
+y = createDropdown(mainPage, "Method", "ATMs", y)
+y = createNumberBox(mainPage, "AI WalkSpeed (Ban Risk)\nRecommended below than 35 game default is 24", "35", y)
+
+local banksLabel = Instance.new("TextLabel", mainPage)
+banksLabel.Text = "Banks"
+banksLabel.Size = UDim2.new(1, -10, 0, 30)
+banksLabel.Position = UDim2.new(0, 5, 0, y)
+banksLabel.BackgroundTransparency = 1
+banksLabel.TextColor3 = Color3.new(1, 1, 1)
+banksLabel.Font = Enum.Font.GothamBold
+banksLabel.TextSize = 18
+banksLabel.TextXAlignment = Enum.TextXAlignment.Left
+y += 35
+
+_, y = createToggle(mainPage, "Auto Deposit", y)
+y = createNumberBox(mainPage, "Auto Deposit", "500", y)
+_, y = createToggle(mainPage, "Auto Hack ATMs", y)
+_, y = createToggle(mainPage, "Auto Deposit Before Hack", y)
+_, y = createToggle(mainPage, "ESP ATMs", y)
+
+-- SETTINGS PAGE CONTENT
+local y2 = 0
+local themeLabel = Instance.new("TextLabel", settingsPage)
+themeLabel.Text = "Theme\nChanges the interface theme."
+themeLabel.Size = UDim2.new(1, -10, 0, 40)
+themeLabel.Position = UDim2.new(0, 5, 0, y2)
+themeLabel.TextXAlignment = Enum.TextXAlignment.Left
+themeLabel.Font = Enum.Font.Gotham
+themeLabel.TextColor3 = Color3.new(1, 1, 1)
+themeLabel.TextSize = 17
+themeLabel.BackgroundTransparency = 1
+
+local themeDropdown = Instance.new("TextBox", settingsPage)
+themeDropdown.Size = UDim2.new(0, 120, 0, 30)
+themeDropdown.Position = UDim2.new(1, -130, 0, y2 + 5)
+themeDropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+themeDropdown.Text = "Vynixu"
+themeDropdown.TextColor3 = Color3.new(1, 1, 1)
+themeDropdown.Font = Enum.Font.Gotham
+themeDropdown.TextSize = 17
+
+y2 += 50
+_, y2 = createToggle(settingsPage, "Transparency\nMakes the interface transparent.", y2)
+
+local minimizeLabel = Instance.new("TextLabel", settingsPage)
+minimizeLabel.Text = "Minimize Bind"
+minimizeLabel.Size = UDim2.new(1, -10, 0, 40)
+minimizeLabel.Position = UDim2.new(0, 5, 0, y2)
+minimizeLabel.TextXAlignment = Enum.TextXAlignment.Left
+minimizeLabel.Font = Enum.Font.Gotham
+minimizeLabel.TextColor3 = Color3.new(1, 1, 1)
+minimizeLabel.TextSize = 17
+minimizeLabel.BackgroundTransparency = 1
+
+local keybindBox = Instance.new("TextBox", settingsPage)
+keybindBox.Size = UDim2.new(0, 40, 0, 30)
+keybindBox.Position = UDim2.new(1, -50, 0, y2 + 5)
+keybindBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+keybindBox.Text = "M"
+keybindBox.TextColor3 = Color3.new(1, 1, 1)
+keybindBox.Font = Enum.Font.Gotham
+keybindBox.TextSize = 17
